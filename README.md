@@ -22,6 +22,18 @@ A **minimal Void Linux distribution with a KDE Plasma 6 graphical session** — 
 
 The full package list on top of `base-system` is [`packages.txt`](packages.txt) — RAVLIN's list plus the graphical stack. Everything else (X11/Wayland session extras, NetworkManager, pipewire-video, tmux, etc.) is deliberately left out to stay small.
 
+## Appearance (RAVLIN look)
+
+Shipped in the `rootfs/` overlay, applied to root on the live image and to every new user via `/etc/skel` (and carried onto installed systems by the local-source install):
+
+- **Wallpaper** — `PirateWall.jpg` at `/usr/share/backgrounds/ravlin/`, set as the default desktop wallpaper (`plasma-org.kde.desktopcontainmentrc`).
+- **Plasma theme** — `RAVLIN Black & Silver` color scheme (`/usr/share/color-schemes/`) on top of Breeze Dark: black windows, silver chrome, green text, pink errors, orange accents.
+- **Konsole** — default `RAVLIN` profile using the `RAVLIN` color scheme: near-black background, **85% opacity with blur** (slightly transparent), green text, pink/orange accents.
+- **fish** — green commands, orange parameters, pink errors, dim-silver autosuggestions; fish's smart tab-completion and autosuggestions are on by default.
+- **btop** — custom `ravlin` theme (black/silver/green/pink/orange).
+- **fastfetch** — prints a green ascii-art **"R"** logo (`/usr/share/ravlin/fastfetch-logo.txt`) via `~/.config/fastfetch/config.jsonc`.
+- **midnight commander** (`mc`) is installed alongside `btop` and `fastfetch`.
+
 bash and dash stay installed because system scripts (including `void-installer`) need them — fish replaces them only as the *login* shell.
 
 ## Building the ISO

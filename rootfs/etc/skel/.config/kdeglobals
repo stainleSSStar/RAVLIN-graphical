@@ -1,0 +1,9 @@
+[$Version]
+update_info=kdeglobals.upd:Ours
+
+[General]
+ColorScheme=RAVLIN-BlackSilver
+
+[KDE]
+ColorScheme=RAVLIN-BlackSilver
+lookAndFeelPackage=org.kde.breezedark.desktop

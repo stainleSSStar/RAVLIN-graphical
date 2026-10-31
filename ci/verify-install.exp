@@ -140,6 +140,33 @@ expect {
     timeout { puts "\n=== CHECK 11c FAILED: Plasma missing ==="; exit 1 }
 }
 
+# 12. the appearance layer: wallpaper, fastfetch logo, konsole scheme, tools
+send "command -v mc btop fastfetch\r"
+expect {
+    "/usr/bin/mc" { puts "\n=== CHECK 12 PASSED: midnight commander installed ===" }
+    timeout { puts "\n=== CHECK 12 FAILED: mc missing ==="; exit 1 }
+}
+expect {
+    "/usr/bin/btop" { puts "\n=== CHECK 12b PASSED: btop installed ===" }
+    timeout { puts "\n=== CHECK 12b FAILED: btop missing ==="; exit 1 }
+}
+expect {
+    "/usr/bin/fastfetch" { puts "\n=== CHECK 12c PASSED: fastfetch installed ===" }
+    timeout { puts "\n=== CHECK 12c FAILED: fastfetch missing ==="; exit 1 }
+}
+
+send "test -f /usr/share/backgrounds/ravlin/PirateWall.jpg; and string join '' WALLPAPER _OK\r"
+expect {
+    "WALLPAPER_OK" { puts "\n=== CHECK 12d PASSED: PirateWall wallpaper shipped ===" }
+    timeout { puts "\n=== CHECK 12d FAILED: wallpaper missing ==="; exit 1 }
+}
+
+send "test -f /usr/share/ravlin/fastfetch-logo.txt -a -f /root/.local/share/konsole/RAVLIN.colorscheme; and string join '' APPEAR _OK\r"
+expect {
+    "APPEAR_OK" { puts "\n=== CHECK 12e PASSED: fastfetch logo + konsole scheme present ===" }
+    timeout { puts "\n=== CHECK 12e FAILED: appearance files missing ==="; exit 1 }
+}
+
 puts "\n=== ALL INSTALL CHECKS PASSED ==="
 send "\001x"
 expect eof

@@ -1,0 +1,6 @@
+[Konsole]
+DefaultProfile=RAVLIN.profile
+
+[MainWindow]
+MenuBar=false
+ToolBar=false

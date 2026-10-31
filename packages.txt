@@ -77,4 +77,12 @@ alsa-pipewire
 
 # --- session management ----------------------------------------------------
 # logind backend so Plasma's logout/shutdown/restart actions work on runit.
+# (D-Bus-activated, not a runit service — see postsetup.sh.)
 elogind
+
+# --- console tools ----------------------------------------------------------
+# midnight commander (TUI file manager), btop (resource monitor, RAVLIN theme),
+# fastfetch (system info with the RAVLIN "R" ascii logo — see rootfs overlay).
+mc
+btop
+fastfetch
