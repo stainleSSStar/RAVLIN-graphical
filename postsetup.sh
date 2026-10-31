@@ -37,7 +37,7 @@ chroot "$ROOTFS" chsh -s /usr/bin/fish root
 # build.sh also passes them via mklive -S; doing it here too keeps the
 # service set correct even if mklive's default set changes, and
 # void-installer's local install copies /var/service to the disk.
-for svc in dbus elogind sddm; do
+for svc in dbus sddm; do
     if [ -d "$ROOTFS/etc/sv/$svc" ]; then
         # /var/service is a (possibly dangling) symlink to
         # /etc/runit/runsvdir/default on Void — link into the real target.
@@ -47,15 +47,11 @@ for svc in dbus elogind sddm; do
     fi
 done
 
-# elogind ships a D-Bus activation file (org.freedesktop.login1.service);
-# if it is present, dbus-daemon spawns elogind on demand and the runit
-# service's instance then crash-loops with "elogind is already running".
-# Supervise it via runit only, so remove the activation file.
-if [ -e "$ROOTFS/usr/share/dbus-1/system-services/org.freedesktop.login1.service" ]; then
-    rm -f "$ROOTFS/usr/share/dbus-1/system-services/org.freedesktop.login1.service"
-    echo "ravlin-graphical: removed elogind D-Bus activation file (runit-supervised)"
-fi
-
+# elogind: do NOT enable its runit service. Its run script mounts a named
+# cgroup, which fails on cgroup-v2-only systems (the live VM), so the
+# service crash-loops. elogind ships a D-Bus activation file
+# (org.freedesktop.login1.service), so dbus-daemon starts it on demand
+# when SDDM/Plasma call logind — that is the instance that works.
 # PipeWire runs per-user inside the graphical session (SDDM provides the
 # D-Bus session and XDG_RUNTIME_DIR). Wire it up system-wide the same way
 # void-mklive's mkiso.sh does: XDG autostart entry + pipewire.conf.d snippets

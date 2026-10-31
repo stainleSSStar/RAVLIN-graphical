@@ -29,10 +29,12 @@ MKLIVE_REPO="https://github.com/void-linux/void-mklive.git"
 MKLIVE_REF="${MKLIVE_REF:-8ca31d112776fdbf7c1deb3dd7e15d87d6712db3}"
 CONTAINER_IMAGE="ghcr.io/void-linux/void-glibc:latest"
 # Live services: DHCP on any NIC, wifi supplicant, power button, ALSA (mixer
-# state save/restore), plus the graphical stack — dbus, elogind, SDDM.
-# (PipeWire has no /etc/sv service in Void; it runs per-user in the graphical
-# session via /etc/xdg/autostart, wired up in postsetup.sh.)
-SERVICES="dhcpcd wpa_supplicant acpid alsa dbus elogind sddm"
+# state save/restore), plus the graphical stack — dbus and SDDM.
+# elogind is D-Bus-activated on demand (its runit service cannot mount a
+# named cgroup on cgroup-v2 systems); PipeWire has no /etc/sv service in
+# Void either — it runs per-user in the graphical session via
+# /etc/xdg/autostart, wired up in postsetup.sh.
+SERVICES="dhcpcd wpa_supplicant acpid alsa dbus sddm"
 # console=ttyS0 makes the live image usable over a serial console: the vmklive
 # dracut module enables agetty-ttyS0 when it sees console=ttyS0 on the kernel
 # cmdline. CI boots the ISO through its own bootloaders and drives checks over

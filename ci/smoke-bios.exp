@@ -104,9 +104,11 @@ expect {
     timeout { puts "\n=== CHECK 9 FAILED: sddm not running ==="; exit 1 }
 }
 
-send "sv status elogind\r"
+# elogind is D-Bus-activated (no working runit service on cgroup v2), so
+# check for the process, not sv status.
+send "pgrep -x elogind\r"
 expect {
-    "run: elogind" { puts "\n=== CHECK 9b PASSED: elogind running ===" }
+    -re {[0-9]+} { puts "\n=== CHECK 9b PASSED: elogind running (D-Bus activated) ===" }
     timeout { puts "\n=== CHECK 9b FAILED: elogind not running ==="; exit 1 }
 }
 
