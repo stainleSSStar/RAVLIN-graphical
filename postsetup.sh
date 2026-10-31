@@ -47,6 +47,15 @@ for svc in dbus elogind sddm; do
     fi
 done
 
+# elogind ships a D-Bus activation file (org.freedesktop.login1.service);
+# if it is present, dbus-daemon spawns elogind on demand and the runit
+# service's instance then crash-loops with "elogind is already running".
+# Supervise it via runit only, so remove the activation file.
+if [ -e "$ROOTFS/usr/share/dbus-1/system-services/org.freedesktop.login1.service" ]; then
+    rm -f "$ROOTFS/usr/share/dbus-1/system-services/org.freedesktop.login1.service"
+    echo "ravlin-graphical: removed elogind D-Bus activation file (runit-supervised)"
+fi
+
 # PipeWire runs per-user inside the graphical session (SDDM provides the
 # D-Bus session and XDG_RUNTIME_DIR). Wire it up system-wide the same way
 # void-mklive's mkiso.sh does: XDG autostart entry + pipewire.conf.d snippets
