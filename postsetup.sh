@@ -39,7 +39,10 @@ chroot "$ROOTFS" chsh -s /usr/bin/fish root
 # void-installer's local install copies /var/service to the disk.
 for svc in dbus elogind sddm; do
     if [ -d "$ROOTFS/etc/sv/$svc" ]; then
-        mkdir -p "$ROOTFS/var/service"
+        # /var/service is a symlink to /etc/runit/runsvdir/default on Void;
+        # mkdir -p on it fails with "File exists", so only create the real
+        # target directory if the symlink is missing entirely.
+        [ -d "$ROOTFS/var/service" ] || mkdir -p "$ROOTFS/etc/runit/runsvdir/default"
         ln -sf "/etc/sv/$svc" "$ROOTFS/var/service/$svc"
         echo "ravlin-graphical: enabled service $svc"
     fi
