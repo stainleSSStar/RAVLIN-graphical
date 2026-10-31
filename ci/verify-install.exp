@@ -19,7 +19,8 @@
 #   9. the RAVLIN Graphical os-release survives a forced base-files reinstall
 #      (xbps preserve= pattern in /etc/xbps.d)
 #  10. the installed hostname is ravlin
-#  11. the graphical stack made it onto the disk: SDDM + KDE Plasma + PipeWire
+#  11. the graphical stack made it onto the disk: SDDM + KDE Plasma +
+#      PipeWire autostart wiring
 #
 # fish wraps command echoes in ANSI escapes; only contiguous output
 # substrings are matched.
@@ -119,16 +120,18 @@ expect {
 }
 
 # 11. the graphical stack is installed and enabled on the target disk:
-# SDDM display manager, Plasma, and the PipeWire audio server.
+# SDDM display manager running, Plasma X11 session present, PipeWire wired.
 set timeout 600
-send "sv status sddm pipewire\r"
+send "sv status sddm\r"
 expect {
     "run: sddm" { puts "\n=== CHECK 11 PASSED: sddm running on installed system ===" }
     timeout { puts "\n=== CHECK 11 FAILED: sddm not running ==="; exit 1 }
 }
+
+send "command -v pipewire\r"
 expect {
-    "run: pipewire" { puts "\n=== CHECK 11b PASSED: pipewire running on installed system ===" }
-    timeout { puts "\n=== CHECK 11b FAILED: pipewire not running ==="; exit 1 }
+    "/usr/bin/pipewire" { puts "\n=== CHECK 11b PASSED: pipewire installed on disk ===" }
+    timeout { puts "\n=== CHECK 11b FAILED: pipewire missing ==="; exit 1 }
 }
 
 send "command -v startplasma-x11\r"

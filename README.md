@@ -15,7 +15,7 @@ A **minimal Void Linux distribution with a KDE Plasma 6 graphical session** — 
 | Display | Xorg (`xorg-minimal` + vesa/fbdev fallbacks), `mesa-dri` (incl. llvmpipe for VMs) |
 | Drivers | `linux-firmware` (full: wifi/LAN **and** GPU blobs), `sof-firmware` + `alsa-ucm-conf` (sound) |
 | Networking | `dhcpcd` + `wpa_supplicant` (enabled by default) |
-| Sound | `alsa-utils` + PipeWire (`pipewire`, `wireplumber` — ships the PulseAudio compat layer) with `plasma-pa` tray applet |
+| Sound | `alsa-utils` + PipeWire (`pipewire`, `wireplumber`, `alsa-pipewire`; PulseAudio compat via `20-pipewire-pulse.conf`) with `plasma-pa` tray applet |
 | Session mgmt | `elogind` (logind) so Plasma logout/shutdown/restart work on runit; `polkit-kde-agent` |
 | Apps | `konsole`, `dolphin`, `systemsettings` — the essentials to run and configure the desktop |
 | Bootloader | GRUB (BIOS + 32/64-bit EFI) |
@@ -64,7 +64,7 @@ Every release ships the ISO plus a `sha256sum.txt`. By default releases land on 
 
 Every build is gated on three QEMU jobs (software emulation — the runners have no KVM), all booting the actual ISO artifacts:
 
-- **BIOS boot** — the ISO boots through its own bootloader chain (SeaBIOS → ISOLINUX → kernel); over the serial console CI verifies: fish login shell with the RAVLIN config, `void-installer` present, RAVLIN Graphical `os-release`, `dhcpcd`/`wpa_supplicant` *running*, ALSA detecting the emulated sound card, the live hostname, and **SDDM + elogind + PipeWire + WirePlumber running** (the graphical stack is up).
+- **BIOS boot** — the ISO boots through its own bootloader chain (SeaBIOS → ISOLINUX → kernel); over the serial console CI verifies: fish login shell with the RAVLIN config, `void-installer` present, RAVLIN Graphical `os-release`, `dhcpcd`/`wpa_supplicant` *running*, ALSA detecting the emulated sound card, the live hostname, and the graphical stack: **SDDM + elogind running, PipeWire installed and wired for session autostart**.
 - **UEFI boot** — the same ISO boots through the EFI chain (OVMF → GRUB EFI → kernel) to a working live session with SDDM running.
 - **Install test** — boots the live ISO, then drives the *real interactive `void-installer`* through its dialog menus onto a blank 12 GiB disk (Local source). The disk then boots through its own GRUB and the installed system is verified: fish, identity, services, sound — plus **SDDM, PipeWire and the Plasma session present on the installed disk** — including a *forced `base-files` reinstall* to prove the `os-release` survives package updates (the `preserve=` pattern in `/etc/xbps.d/49-ravlin-graphical-preserve.conf`).
 
@@ -139,7 +139,7 @@ Optional additions if you want more than the minimum: `NetworkManager` + `plasma
 
 - **KDE Plasma on top of RAVLIN's TTY base.** Same build pipeline (void-mklive), same installer, same fish/networking/sound choices — plus `sddm`, Plasma, Xorg, PipeWire and elogind.
 - **X11 session by default.** Plasma 6 runs fine on Xorg; this keeps the package set small and works on the widest hardware (incl. VMs via vesa/llvmpipe). Wayland is an optional add-on (see above).
-- **PipeWire instead of PulseAudio.** Plasma 6 expects PipeWire; Void's `pipewire` package ships the PulseAudio compatibility layer, so ALSA/Pulse apps keep working.
+- **PipeWire instead of PulseAudio, per-user.** Plasma 6 expects PipeWire. Void's `pipewire` package ships the PulseAudio compatibility layer and there is no `/etc/sv` service for it — instead, `postsetup.sh` wires the same setup void-mklive's `mkiso.sh` uses: an XDG autostart entry plus `pipewire.conf.d` snippets launching WirePlumber and the pulse compat server, so PipeWire starts inside the SDDM/Plasma session (which provides the D-Bus session and `XDG_RUNTIME_DIR`). ALSA apps are routed via `alsa-pipewire`.
 - **elogind enabled.** On runit there is no systemd-logind; elogind provides the logind API so Plasma's logout/shutdown/restart and `polkit-kde-agent` work.
 - **void-installer instead of a custom installer.** Same reasoning as RAVLIN: upstream, battle-tested, dialog-based. Local-source installs copy the whole live rootfs — graphical stack included.
 - **bash stays installed.** Removing it breaks virtually every system script. fish is the *default shell*, not the only binary on disk.

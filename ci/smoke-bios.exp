@@ -18,7 +18,9 @@
 #      merely enabled
 #   7. ALSA detects the emulated sound card (aplay -l)
 #   8. the live hostname is ravlin (the patched vmklive boot hook)
-#   9. the graphical stack is up: SDDM, elogind, PipeWire, WirePlumber
+#   9. the graphical stack is up: SDDM + elogind running; PipeWire installed
+#      and wired for session autostart (it runs per-user in the Plasma
+#      session, not as a runit service)
 #
 # fish wraps command echoes in ANSI escapes; only contiguous output
 # substrings are matched.
@@ -102,18 +104,23 @@ expect {
     timeout { puts "\n=== CHECK 9 FAILED: sddm not running ==="; exit 1 }
 }
 
-send "sv status elogind pipewire wireplumber\r"
+send "sv status elogind\r"
 expect {
     "run: elogind" { puts "\n=== CHECK 9b PASSED: elogind running ===" }
     timeout { puts "\n=== CHECK 9b FAILED: elogind not running ==="; exit 1 }
 }
+
+# PipeWire is a per-user session process (XDG autostart), not a runit
+# service — verify the package and its system-wide wiring instead.
+send "command -v pipewire\r"
 expect {
-    "run: pipewire" { puts "\n=== CHECK 9c PASSED: pipewire running ===" }
-    timeout { puts "\n=== CHECK 9c FAILED: pipewire not running ==="; exit 1 }
+    "/usr/bin/pipewire" { puts "\n=== CHECK 9c PASSED: pipewire installed ===" }
+    timeout { puts "\n=== CHECK 9c FAILED: pipewire missing ==="; exit 1 }
 }
+send "test -L /etc/xdg/autostart/pipewire.desktop -a -L /etc/pipewire/pipewire.conf.d/10-wireplumber.conf -a -L /etc/pipewire/pipewire.conf.d/20-pipewire-pulse.conf; and string join '' PIPEWIRE _WIRED _OK\r"
 expect {
-    "run: wireplumber" { puts "\n=== CHECK 9d PASSED: wireplumber running ===" }
-    timeout { puts "\n=== CHECK 9d FAILED: wireplumber not running ==="; exit 1 }
+    "PIPEWIRE_WIRED_OK" { puts "\n=== CHECK 9d PASSED: pipewire session autostart wired ===" }
+    timeout { puts "\n=== CHECK 9d FAILED: pipewire autostart not wired ==="; exit 1 }
 }
 
 puts "\n=== ALL BIOS BOOT CHECKS PASSED ==="

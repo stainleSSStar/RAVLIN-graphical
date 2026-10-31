@@ -33,16 +33,31 @@ grep -qx '/usr/bin/fish' "$ROOTFS/etc/shells" || echo '/usr/bin/fish' >> "$ROOTF
 echo "ravlin-graphical: setting fish as the root shell"
 chroot "$ROOTFS" chsh -s /usr/bin/fish root
 
-# Make sure the display manager and audio/session services are enabled on
-# the live rootfs. build.sh also passes them via mklive -S; doing it here
-# too keeps the service set correct even if mklive's default set changes,
-# and void-installer's local install copies /var/service to the disk.
-for svc in dbus elogind sddm pipewire wireplumber; do
+# Make sure the graphical/session services are enabled on the live rootfs.
+# build.sh also passes them via mklive -S; doing it here too keeps the
+# service set correct even if mklive's default set changes, and
+# void-installer's local install copies /var/service to the disk.
+for svc in dbus elogind sddm; do
     if [ -d "$ROOTFS/etc/sv/$svc" ]; then
         mkdir -p "$ROOTFS/var/service"
         ln -sf "/etc/sv/$svc" "$ROOTFS/var/service/$svc"
         echo "ravlin-graphical: enabled service $svc"
     fi
 done
+
+# PipeWire runs per-user inside the graphical session (SDDM provides the
+# D-Bus session and XDG_RUNTIME_DIR). Wire it up system-wide the same way
+# void-mklive's mkiso.sh does: XDG autostart entry + pipewire.conf.d snippets
+# that launch wireplumber and the PulseAudio compat server, plus the ALSA
+# route-to-pipewire configs from alsa-pipewire.
+echo "ravlin-graphical: wiring up PipeWire session autostart"
+mkdir -p "$ROOTFS/etc/xdg/autostart"
+ln -sf /usr/share/applications/pipewire.desktop "$ROOTFS/etc/xdg/autostart/pipewire.desktop"
+mkdir -p "$ROOTFS/etc/pipewire/pipewire.conf.d"
+ln -sf /usr/share/examples/wireplumber/10-wireplumber.conf "$ROOTFS/etc/pipewire/pipewire.conf.d/10-wireplumber.conf"
+ln -sf /usr/share/examples/pipewire/20-pipewire-pulse.conf "$ROOTFS/etc/pipewire/pipewire.conf.d/20-pipewire-pulse.conf"
+mkdir -p "$ROOTFS/etc/alsa/conf.d"
+ln -sf /usr/share/alsa/alsa.conf.d/50-pipewire.conf "$ROOTFS/etc/alsa/conf.d/50-pipewire.conf"
+ln -sf /usr/share/alsa/alsa.conf.d/99-pipewire-default.conf "$ROOTFS/etc/alsa/conf.d/99-pipewire-default.conf"
 
 echo "ravlin-graphical: postsetup done"

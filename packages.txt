@@ -54,6 +54,7 @@ sddm
 # --- KDE Plasma 6 (minimal session) ---------------------------------------
 plasma-desktop
 plasma-workspace
+plasma-workspace-x11   # startplasma-x11 + plasmax11.desktop (SDDM's default X session)
 kwin
 plasma-integration
 breeze
@@ -66,10 +67,13 @@ polkit-kde-agent
 xdg-desktop-portal-kde
 
 # --- audio server ----------------------------------------------------------
-# Plasma 6 uses PipeWire; the pipewire package ships the PulseAudio
-# compatibility layer (20-pipewire-pulse.conf), so no pulseaudio needed.
+# Plasma 6 uses PipeWire. pipewire pulls wireplumber (session manager) and
+# ships the PulseAudio compat layer; alsa-pipewire routes plain ALSA apps.
+# PipeWire runs per-user, autostarted in the graphical session via
+# /etc/xdg/autostart (wired up in postsetup.sh) — no runit service needed.
 pipewire
 wireplumber
+alsa-pipewire
 
 # --- session management ----------------------------------------------------
 # logind backend so Plasma's logout/shutdown/restart actions work on runit.
