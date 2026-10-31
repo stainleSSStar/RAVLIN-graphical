@@ -173,7 +173,9 @@ jobs:
     name: Install test (real void-installer, local install)
     runs-on: ubuntu-24.04
     needs: build
-    timeout-minutes: 180
+    # the TCG rootfs copy + initramfs + GRUB of the ~2 GiB KDE image is slow
+    # and variable; give the job room for the worst case
+    timeout-minutes: 300
 
     steps:
       - name: Checkout RAVLIN Graphical (test scripts)

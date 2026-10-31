@@ -24,7 +24,7 @@
 set timeout 1800
 log_file -noappend install-serial.log
 
-spawn qemu-system-x86_64 -m 4096 -smp 2 -nographic -no-reboot \
+spawn qemu-system-x86_64 -m 6144 -smp 4 -nographic -no-reboot \
     -nic user,model=virtio-net-pci \
     -drive file=disk.img,format=raw,if=virtio \
     -cdrom [glob ravlin-graphical-live-*.iso] -boot d
@@ -112,9 +112,10 @@ send "S\r"
 await "Select installation source"
 send "\r"                     ;# Local
 
-# Install: mkfs, rootfs copy, dracut, GRUB — slow under TCG
+# Install: mkfs, rootfs copy, dracut, GRUB — very slow under TCG (the ~2 GiB
+# KDE rootfs copy alone can take over an hour on a loaded runner)
 await "installation menu"
-set timeout 5400
+set timeout 10800
 send "I\r"
 await "The user account is not set up properly"
 send "\r"                     ;# continue without a user
