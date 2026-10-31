@@ -1,0 +1,15 @@
+Welcome to the RAVLIN Graphical live session!
+
+  * this live image boots into KDE Plasma (SDDM on tty1)
+    live login:  root / voidlinux
+
+  * install to disk:  void-installer
+    (interactive console installer: keyboard, locale, timezone, users,
+    partitioning, bootloader — it walks you through everything)
+
+  * networking: dhcpcd and wpa_supplicant are running; wifi can be
+    configured from the installer's Network menu
+
+  * the console shell is fish: `help`, or `man fish`
+
+RAVLIN Graphical is a minimal remix of Void Linux. https://www.voidlinux.org
