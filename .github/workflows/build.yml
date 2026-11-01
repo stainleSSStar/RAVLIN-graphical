@@ -174,8 +174,9 @@ jobs:
     runs-on: ubuntu-24.04
     needs: build
     # the TCG rootfs copy + initramfs + GRUB of the ~2 GiB KDE image is slow
-    # and variable; give the job room for the worst case
-    timeout-minutes: 300
+    # and variable; give the job room for the worst case (KVM is used when
+    # the runner exposes /dev/kvm, which makes this much faster)
+    timeout-minutes: 360
 
     steps:
       - name: Checkout RAVLIN Graphical (test scripts)

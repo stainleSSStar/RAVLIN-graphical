@@ -28,10 +28,10 @@
 set timeout 2400
 log_file -noappend serial-bios.log
 
-spawn qemu-system-x86_64 -m 4096 -smp 2 -nographic -no-reboot \
-    -nic user,model=virtio-net-pci \
-    -device intel-hda -device hda-duplex \
-    -cdrom [glob ravlin-graphical-live-*.iso] -boot d
+# Use KVM when available, fall back to TCG.
+set QEMU_ARGS {-m 4096 -smp 4 -nographic -no-reboot -nic user,model=virtio-net-pci -device intel-hda -device hda-duplex -cdrom [glob ravlin-graphical-live-*.iso] -boot d}
+if {[file exists /dev/kvm] && [file writable /dev/kvm]} { lappend QEMU_ARGS -enable-kvm }
+spawn qemu-system-x86_64 {*}$QEMU_ARGS
 
 expect {
     "login:" { puts "\n=== CHECK 1 PASSED: booted via the ISOLINUX bootloader ===" }

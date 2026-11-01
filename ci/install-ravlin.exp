@@ -24,10 +24,11 @@
 set timeout 1800
 log_file -noappend install-serial.log
 
-spawn qemu-system-x86_64 -m 6144 -smp 4 -nographic -no-reboot \
-    -nic user,model=virtio-net-pci \
-    -drive file=disk.img,format=raw,if=virtio \
-    -cdrom [glob ravlin-graphical-live-*.iso] -boot d
+# Use KVM when the runner exposes /dev/kvm (much faster than TCG for the
+# multi-GB rootfs copy + dracut); fall back to TCG otherwise.
+set QEMU_ARGS {-m 6144 -smp 4 -nographic -no-reboot -nic user,model=virtio-net-pci -drive file=disk.img,format=raw,if=virtio -cdrom [glob ravlin-graphical-live-*.iso] -boot d}
+if {[file exists /dev/kvm] && [file writable /dev/kvm]} { lappend QEMU_ARGS -enable-kvm }
+spawn qemu-system-x86_64 {*}$QEMU_ARGS
 
 proc await {pattern} {
     expect {
