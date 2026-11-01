@@ -18,9 +18,10 @@ set timeout 2400
 log_file -noappend serial-uefi.log
 
 # Use KVM when available, fall back to TCG.
-set QEMU_ARGS {-m 4096 -smp 4 -nographic -no-reboot -bios /usr/share/ovmf/OVMF.fd -cdrom [glob ravlin-graphical-live-*.iso]}
-if {[file exists /dev/kvm] && [file writable /dev/kvm]} { lappend QEMU_ARGS -enable-kvm }
-spawn qemu-system-x86_64 {*}$QEMU_ARGS
+set ISO [glob ravlin-graphical-live-*.iso]
+set QEMU_ARGS "-m 4096 -smp 4 -nographic -no-reboot -bios /usr/share/ovmf/OVMF.fd -cdrom $ISO"
+if {[file exists /dev/kvm] && [file writable /dev/kvm]} { append QEMU_ARGS " -enable-kvm" }
+eval spawn qemu-system-x86_64 $QEMU_ARGS
 
 expect {
     "login:" { puts "\n=== CHECK 1 PASSED: booted via the UEFI bootloader chain ===" }

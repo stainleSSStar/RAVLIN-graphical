@@ -29,9 +29,9 @@ set timeout 2400
 log_file -noappend verify-serial.log
 
 # Use KVM when available, fall back to TCG.
-set QEMU_ARGS {-m 4096 -smp 4 -nographic -no-reboot -nic user,model=virtio-net-pci -drive file=disk.img,format=raw,if=virtio}
-if {[file exists /dev/kvm] && [file writable /dev/kvm]} { lappend QEMU_ARGS -enable-kvm }
-spawn qemu-system-x86_64 {*}$QEMU_ARGS
+set QEMU_ARGS "-m 4096 -smp 4 -nographic -no-reboot -nic user,model=virtio-net-pci -drive file=disk.img,format=raw,if=virtio"
+if {[file exists /dev/kvm] && [file writable /dev/kvm]} { append QEMU_ARGS " -enable-kvm" }
+eval spawn qemu-system-x86_64 $QEMU_ARGS
 
 expect {
     "login:" { puts "\n=== CHECK 1 PASSED: installed system boots via its own GRUB ===" }
